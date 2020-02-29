@@ -1,49 +1,34 @@
-import { NgModule }       from '@angular/core';
-import { BrowserModule }  from '@angular/platform-browser';
-import { FormsModule }    from '@angular/forms';
-import { HttpClientModule }    from '@angular/common/http';
+import { TestBed } from '@angular/core/testing';
+import { HeroService } from './hero.service';
+import { MessageService } from './message.service';
+import { HttpClientTestingModule, HttpTestingController } from '@angular/common/http/testing';
 
-import { HttpClientInMemoryWebApiModule } from 'angular-in-memory-web-api';
-import { InMemoryDataService }  from './in-memory-data.service';
+describe('HeroService', () => {
+  const mockMsgService = jasmine.createSpyObj('MessageService', ['add']);
+  let httpTestingController: HttpTestingController;
+  let service;
+  beforeEach(() => {
 
-import { AppRoutingModule }     from './app-routing.module';
+    TestBed.configureTestingModule({
+      imports: [HttpClientTestingModule],
+      providers: [
+        HeroService,
+        { provide: MessageService, useValue: mockMsgService },
+      ]
+    });
 
-import { AppComponent }         from './app.component';
-import { DashboardComponent }   from './dashboard/dashboard.component';
-import { HeroDetailComponent }  from './hero-detail/hero-detail.component';
-import { HeroesComponent }      from './heroes/heroes.component';
-import { HeroSearchComponent }  from './hero-search/hero-search.component';
-import { HeroService }          from './hero.service';
-import { MessageService }       from './message.service';
-import { MessagesComponent }    from './messages/messages.component';
-import { StrengthPipe } from './strength/strength.pipe';
-import { HeroComponent } from './hero/hero.component';
+    httpTestingController = TestBed.get(HttpTestingController);
+    service = TestBed.get(MessageService);
+  });
 
-@NgModule({
-  imports: [
-    BrowserModule,
-    FormsModule,
-    AppRoutingModule,
-    HttpClientModule,
+  describe('getHero', () => {
+    it('should call get with the correct URL', () => {
+      service.getHero(4).subscribe();
+      // service.getHero(3).subscribe(); wrong url not expected
+      const req = httpTestingController.expectOne('/api/heroes/4');
+      req.flush({ id: 4, name: 'SuperDude', strength: 100 });
 
-    // The HttpClientInMemoryWebApiModule module intercepts HTTP requests
-    // and returns simulated server responses.
-    // Remove it when a real server is ready to receive requests.
-    HttpClientInMemoryWebApiModule.forRoot(
-      InMemoryDataService, { dataEncapsulation: false }
-    )
-  ],
-  declarations: [
-    AppComponent,
-    DashboardComponent,
-    HeroesComponent,
-    HeroDetailComponent,
-    MessagesComponent,
-    HeroSearchComponent,
-    StrengthPipe,
-    HeroComponent
-  ],
-  providers: [ HeroService, MessageService ],
-  bootstrap: [ AppComponent ]
-})
-export class AppModule { }
+      httpTestingController.verify(); // used to check if multiple calls are made
+    });
+  });
+});
