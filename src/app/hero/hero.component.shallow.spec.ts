@@ -1,6 +1,7 @@
 import { ComponentFixture, TestBed } from '@angular/core/testing';
 import { HeroComponent } from './hero.component';
 import { NO_ERRORS_SCHEMA } from '@angular/core';
+import { By } from '@angular/platform-browser';
 
 
 describe('Herp Component Shallow Test', () => {
@@ -23,5 +24,8 @@ describe('Herp Component Shallow Test', () => {
         fixture.componentInstance.hero = { id: 1, name: 'SuperDude', strength: 3 };
         fixture.detectChanges();
         expect(fixture.nativeElement.querySelector('a').textContent).toContain('SuperDude');
+        const de = fixture.debugElement.query(By.css('a'));
+        // debug element also exposes directives and component instance
+        expect(de.nativeElement.textContent).toContain('SuperDude');
     });
 });
